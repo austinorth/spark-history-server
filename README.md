@@ -1,85 +1,144 @@
-# 💥 Spark History Server (Spark Web UI) 💥
-Spark History Server is a Web user interface to monitor the metrics and performance of the spark jobs from [Apache Spark](https://spark.apache.org/).
+# Spark History Server
 
-🚀 Helm Chart bootstraps Spark History Server in [Amazon EKS](https://aws.amazon.com/eks/) Cluster or any [Kubernetes](https://kubernetes.io/) Cluster which uses [Amazon S3](https://aws.amazon.com/s3/) as a Spark event log data source using [Helm](https://helm.sh/) package manager.
+A Helm chart and Docker container for deploying Spark History Server (Spark Web UI) to monitor the metrics and performance of your Spark jobs.
 
-🚀 [Spark History Server](https://spark.apache.org/docs/latest/monitoring.html#spark-history-server-configuration-options) 
-configured to read [Spark Event Logs](https://spark.apache.org/docs/latest/monitoring.html#applying-compaction-on-rolling-event-log-files) from [Amazon S3](https://aws.amazon.com/s3/) buckets with this Helm chart using IRSA.
+## Overview
 
-🚀 Check out the [instructions](https://github.com/kubedai/spark-history-server/tree/main/docker) to run Spark WebUI using a local [Docker](https://www.docker.com/) container. 
+This project provides two main components:
 
-## Prerequisites
-:white_check_mark: Kubernetes 1.19+
+1. A Docker image for Spark History Server configured to read Spark Event Logs
+2. A Helm chart for deploying Spark History Server in Kubernetes
 
-:white_check_mark: [Helm 3+](https://helm.sh/docs/intro/install/)
+Spark History Server provides a web interface that visualizes information about completed Spark applications, including event timelines, stages, and executor metrics.
 
-:white_check_mark: Ensure [IRSA role](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html) created to add as an annotation for service account in `values.yaml`.
+## Docker Image
 
-:white_check_mark: [Install eksctl](https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html) and run the following command to create AWS IRSA. Or use any other IaC tool to create IRSA. 
+### Prerequisites
 
-```
-eksctl create iamserviceaccount --cluster=<eks-cluster-name> --name=<serviceAccountName> --namespace=<serviceAccountNamespace> --attach-policy-arn=<policyARN>
-```
+- Docker installed on your machine
+- Git client
+- AWS credentials (if accessing logs from S3)
 
-**Example:**
+### Building the Docker Image
 
-*Note: If the namespace doesn't exist already, it will be created*
-
-```
-eksctl create iamserviceaccount --cluster=eks-demo-cluster --name=spark-history-server --namespace=spark-history-server --attach-policy-arn=arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+```shell
+git clone https://github.com/kubedai/spark-history-server.git
+cd spark-history-server
+docker build -t $USER/spark-web-ui:latest .
 ```
 
-Update `values.yaml` with `annotations`, serviceAccount `name` and the s3 bucket `name` and `prefix`
+### Running the Docker Container Locally
 
+The repository includes a helper script to simplify running the container locally. The script supports the following actions:
+
+```shell
+sh launch_spark_history_server_locally.sh {start|stop|restart|status|help} [options]
 ```
+
+#### Example: Starting the container with S3 bucket
+
+```shell
+sh launch_spark_history_server_locally.sh start -sb my-bucket -sp spark/history/events
+```
+
+#### Options:
+
+- `-sb or --S3_BUCKET`: S3 bucket name (required for start/restart)
+- `-sp or --S3_BUCKET_PREFIX`: S3 bucket prefix where event logs are stored (required for start/restart)
+- `-r or --AWS_REGION`: AWS Region (default: us-east-1)
+- `-cn or --CONTAINER_NAME`: Container name (default: spark-history-server)
+- `-du or --DOCKER_USER`: Docker user (default: current user)
+- `-ak or --AWS_ACCESS_KEY_ID`: AWS access key (optional if exported as env var)
+- `-as or --AWS_SECRET_ACCESS_KEY`: AWS secret key (optional if exported as env var)
+- `-at or --AWS_SESSION_TOKEN`: AWS session token (optional if exported as env var)
+
+When started, you can access the Spark History Server at http://localhost:18080
+
+## Helm Chart Deployment
+
+### Prerequisites
+
+- Kubernetes 1.19+
+- Helm 3+
+- IAM Role for Service Account (IRSA) if using in AWS EKS with S3 bucket access
+
+### Creating IAM Role for Service Account (AWS EKS only)
+
+If deploying on EKS and using S3 for Spark Event logs, you'll need to create an IAM Role for Service Accounts:
+
+```shell
+eksctl create iamserviceaccount \
+  --cluster=<eks-cluster-name> \
+  --name=spark-history-server \
+  --namespace=spark-history-server \
+  --attach-policy-arn=arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+```
+
+### Installing the Helm Chart
+
+Add the repository and update:
+
+```shell
+helm repo add kubedai https://kubedai.github.io/spark-history-server
+helm repo update
+```
+
+Install the chart:
+
+```shell
+helm install spark-history-server kubedai/spark-history-server --namespace spark-history-server
+```
+
+### Configuration
+
+Before deploying, you'll need to update the `values.yaml` file with:
+
+1. Service account annotations (with IRSA role ARN for AWS EKS)
+2. S3 bucket info for Spark event logs
+
+Example values:
+
+```yaml
 serviceAccount:
   create: false
   annotations:
     eks.amazonaws.com/role-arn: "<ENTER_IRSA_IAM_ROLE_ARN_HERE>"
-  name: "<SERVICE_ACCOUNT_NAME>"
+  name: "spark-history-server"
 
 sparkHistoryOpts: "-Dspark.history.fs.logDirectory=s3a://<ENTER_S3_BUCKET_NAME>/<PREFIX_FOR_SPARK_EVENT_LOGS>/"
 ```
 
-## Get Repo Info
-    helm repo add kubedai https://kubedai.github.io/spark-history-server
-    helm repo update
+### Accessing Spark History Server UI
 
-## Install Chart
-    helm install spark-history-server kubedai/spark-history-server --namespace spark-history-server
+#### Using port-forward
 
-## Uninstall Chart
-    helm uninstall spark-history-server --namespace spark-history-server
-
-## Upgrading Chart
-    helm upgrade spark-history-server --namespace spark-history-server
-
-## How to access Spark WebUI
-
-Spark WebUI can be accessed via ALB with Ingress or using port-forward once the Helm chart deployed to Amazon EKS or Kubernetes cluster. 
-
-### Access Spark Web UI using port-forward
-
-Step1: 
-```sh
+```shell
 kubectl port-forward services/spark-history-server 18085:80 -n spark-history-server
 ```
 
-Step2: 
+Then open a browser and navigate to `http://localhost:18085/`
 
-Open any browser with and enter `http://localhost:18085/` to access Spark Web UI
+#### Using Ingress
 
-You should see the following home page
+If you have configured an ingress, you can access the UI through the ingress URL.
 
-<p align="center">
-  <img src="https://github.com/kubedai/spark-history-server/blob/main/images/spark-webui-home.png" alt="example of Spark Web UI Homepage" width="100%">
-</p>
+### Managing the Helm Release
 
-Spark Web UI Executors page
+Upgrade the chart:
 
-<p align="center">
-  <img src="https://github.com/kubedai/spark-history-server/blob/main/images/spark-webui-executors.png" alt="example of Spark Web UI Executors page" width="100%">
-</p>
+```shell
+helm upgrade spark-history-server --namespace spark-history-server
+```
+
+Uninstall the chart:
+
+```shell
+helm uninstall spark-history-server --namespace spark-history-server
+```
 
 ## Community
 Give us a star ⭐️ - If you are using Spark History Server, we would love a star ❤️
+
+## License
+
+This project is licensed under the Apache License 2.0.
