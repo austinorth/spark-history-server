@@ -1,6 +1,7 @@
 # Spark History Server
 
-A Helm chart and Docker container for deploying Spark History Server (Spark Web UI) to monitor the metrics and performance of your Spark jobs.
+A Helm chart and Docker container for deploying Spark History Server (Spark Web
+UI) to monitor the metrics and performance of your Spark jobs.
 
 ## Overview
 
@@ -9,7 +10,9 @@ This project provides two main components:
 1. A Docker image for Spark History Server configured to read Spark Event Logs
 2. A Helm chart for deploying Spark History Server in Kubernetes
 
-Spark History Server provides a web interface that visualizes information about completed Spark applications, including event timelines, stages, and executor metrics.
+Spark History Server provides a web interface that visualizes information about
+completed Spark applications, including event timelines, stages, and executor
+metrics.
 
 ## Docker Image
 
@@ -29,7 +32,8 @@ docker build -t $USER/spark-web-ui:latest .
 
 ### Running the Docker Container Locally
 
-The repository includes a helper script to simplify running the container locally. The script supports the following actions:
+The repository includes a helper script to simplify running the container
+locally. The script supports the following actions:
 
 ```shell
 sh launch_spark_history_server_locally.sh {start|stop|restart|status|help} [options]
@@ -64,7 +68,8 @@ When started, you can access the Spark History Server at http://localhost:18080
 
 ### Creating IAM Role for Service Account (AWS EKS only)
 
-If deploying on EKS and using S3 for Spark Event logs, you'll need to create an IAM Role for Service Accounts:
+If deploying on EKS and using S3 for Spark Event logs, you'll need to create an
+IAM Role for Service Accounts:
 
 ```shell
 eksctl create iamserviceaccount \
