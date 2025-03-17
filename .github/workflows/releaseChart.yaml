@@ -20,6 +20,6 @@ jobs:
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
       - name: Publish Helm chart
-        uses: helm/chart-releaser@v1
+        uses: helm/chart-releaser-action@v1
         with:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
