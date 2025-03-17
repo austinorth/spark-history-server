@@ -1,3 +1,5 @@
+[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/spark-history-server)](https://artifacthub.io/packages/search?repo=spark-history-server)
+
 # Spark History Server
 
 A Helm chart and Docker container for deploying Spark History Server (Spark Web
