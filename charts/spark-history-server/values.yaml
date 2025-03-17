@@ -5,10 +5,10 @@
 replicaCount: 1
 
 image:
-  repository: varabonthu/spark-web-ui
-  pullPolicy: Always
+  repository: austinorth/spark-history-server
+  pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: 1.0.6
+  # tag: 1.0.0
 
 imagePullSecrets: []
 nameOverride: ""
@@ -20,7 +20,6 @@ serviceAccount:
   # annotations:
   #   # IRSA role attached to service account
   #   eks.amazonaws.com/role-arn: <IRSA ROLE ARN>
-
 
 # Enter S3 bucket with Spark Event logs location.
 # Ensure IRSA roles has permissions to read the files for the given S3 bucket
@@ -45,7 +44,7 @@ podSecurityContext:
 securityContext:
   capabilities:
     drop:
-     - ALL
+      - ALL
   readOnlyRootFilesystem: true
   runAsNonRoot: true
   runAsUser: 1000

@@ -1,11 +1,11 @@
-name: release
+name: Release Helm Chart
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
     paths:
-      - "stable/**"
+      - "charts/**"
+
   release:
     types:
       - published
@@ -13,12 +13,19 @@ on:
 
 jobs:
   release:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Publish Helm charts
-        uses: stefanprodan/helm-gh-pages@0ad2bb377311d61ac04ad9eb6f252fb68e207260 # v1.7.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          charts_dir: stable
+          fetch-depth: 0
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+      - name: Publish Helm chart
+        uses: helm/chart-releaser-action@ffaa7be82753e7c58be4ff39854a4f8b79b140de # v1.7.0
+        with:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"

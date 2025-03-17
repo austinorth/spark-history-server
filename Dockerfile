@@ -13,7 +13,7 @@ RUN tar -xzf spark-3.3.2-bin-without-hadoop.tgz && \
     rm spark-3.3.2-bin-without-hadoop.tgz
 RUN mvn dependency:copy-dependencies -DoutputDirectory=/opt/spark/jars/
 RUN rm /opt/spark/jars/jsr305-3.0.0.jar && \
-    rm /opt/spark/jars/jersey-*-1.19.jar && \
+    rm /opt/spark/jars/jersey-*-1.19.4.jar && \
     rm /opt/spark/jars/joda-time-2.8.1.jar && \
     rm /opt/spark/jars/jmespath-java-*.jar && \
     rm /opt/spark/jars/aws-java-sdk-core-*.jar && \
