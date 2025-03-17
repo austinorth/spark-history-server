@@ -21,5 +21,5 @@ jobs:
 
       - name: Publish Helm chart
         uses: helm/chart-releaser-action@v1
-        with:
+        env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
