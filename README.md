@@ -2,145 +2,99 @@
 
 # Spark History Server
 
-A Helm chart and Docker container for deploying Spark History Server (Spark Web
-UI) to monitor the metrics and performance of your Spark jobs.
+A Helm chart and Docker container for deploying Spark History Server (Spark Web UI) to monitor the metrics and performance of your Spark jobs.
 
 ## Overview
 
 This project provides two main components:
 
-1. A Docker image for Spark History Server configured to read Spark Event Logs
-2. A Helm chart for deploying Spark History Server in Kubernetes
+1. **Docker Image**: A ready-to-use Docker image for Spark History Server configured to read Spark Event Logs from S3
+2. **Helm Chart**: A Kubernetes Helm chart for easy deployment of Spark History Server on Kubernetes clusters
 
-Spark History Server provides a web interface that visualizes information about
-completed Spark applications, including event timelines, stages, and executor
-metrics.
+The Spark History Server provides a web interface that visualizes information about completed Spark applications, including event timelines, stages, tasks, and executor metrics, helping you diagnose and troubleshoot Spark job performance.
 
-## Docker Image
+## Quick Start
 
-### Prerequisites
+### Using the Helm Chart
 
-- Docker installed on your machine
-- Git client
-- AWS credentials (if accessing logs from S3)
+```bash
+# Add the Helm repository
+helm repo add austinorth https://austinorth.github.io/spark-history-server
+helm repo update
 
-### Building the Docker Image
+# Install the chart with your S3 bucket information
+helm install spark-history-server austinorth/spark-history-server \
+  --namespace spark-history-server \
+  --create-namespace \
+  --set sparkHistoryOpts="-Dspark.history.fs.logDirectory=s3a://YOUR-BUCKET/spark-event-logs/" \
+  --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"="YOUR-IRSA-ROLE-ARN"
+```
 
-```shell
-git clone https://github.com/kubedai/spark-history-server.git
+For detailed chart configuration options, see the [Helm Chart README](charts/spark-history-server/README.md).
+
+### Using the Docker Image
+
+```bash
+# Run the Docker container with S3 access
+docker run -d -p 18080:18080 \
+  -e SPARK_HISTORY_OPTS="-Dspark.history.fs.logDirectory=s3a://YOUR-BUCKET/spark-event-logs/ \
+  -Dspark.hadoop.fs.s3a.access.key=YOUR_AWS_ACCESS_KEY \
+  -Dspark.hadoop.fs.s3a.secret.key=YOUR_AWS_SECRET_KEY" \
+  austinorth/spark-history-server
+```
+
+## Docker Image Details
+
+The provided Docker image:
+- Based on Amazon Corretto 8 with Maven 3.6
+- Includes Spark 3.3.2 (without Hadoop)
+- Configured with required AWS/S3 dependencies
+- Default port: 18080
+
+### Building the Docker Image Locally
+
+```bash
+git clone https://github.com/austinorth/spark-history-server.git
 cd spark-history-server
-docker build -t $USER/spark-web-ui:latest .
+docker build -t your-username/spark-history-server:latest .
 ```
 
-### Running the Docker Container Locally
+### Helper Script for Local Testing
 
-The repository includes a helper script to simplify running the container
-locally. The script supports the following actions:
+The repository includes a convenient script for running Spark History Server locally:
 
-```shell
-sh launch_spark_history_server_locally.sh {start|stop|restart|status|help} [options]
+```bash
+# Start the server pointing to your S3 bucket
+sh launch_spark_history_server_locally.sh start -sb your-bucket-name -sp path/to/events
 ```
 
-#### Example: Starting the container with S3 bucket
+Run `sh launch_spark_history_server_locally.sh help` for all available options.
 
-```shell
-sh launch_spark_history_server_locally.sh start -sb my-bucket -sp spark/history/events
-```
+## Helm Chart Details
 
-#### Options:
+The Helm chart provides:
+- Easy configuration for S3 event log sources
+- AWS IAM Role for Service Account (IRSA) support
+- Customizable resource requests and limits
+- Ingress support for exposing the service
+- Readiness and liveness probes
 
-- `-sb or --S3_BUCKET`: S3 bucket name (required for start/restart)
-- `-sp or --S3_BUCKET_PREFIX`: S3 bucket prefix where event logs are stored (required for start/restart)
-- `-r or --AWS_REGION`: AWS Region (default: us-east-1)
-- `-cn or --CONTAINER_NAME`: Container name (default: spark-history-server)
-- `-du or --DOCKER_USER`: Docker user (default: current user)
-- `-ak or --AWS_ACCESS_KEY_ID`: AWS access key (optional if exported as env var)
-- `-as or --AWS_SECRET_ACCESS_KEY`: AWS secret key (optional if exported as env var)
-- `-at or --AWS_SESSION_TOKEN`: AWS session token (optional if exported as env var)
+For complete configuration options, see the [Helm Chart README](charts/spark-history-server/README.md).
 
-When started, you can access the Spark History Server at http://localhost:18080
+## AWS IAM Setup
 
-## Helm Chart Deployment
+If deploying in AWS EKS with S3 access:
 
-### Prerequisites
+1. Create an IAM policy for S3 read access to your event logs bucket
+2. Create an IAM role for service account (IRSA):
 
-- Kubernetes 1.19+
-- Helm 3+
-- IAM Role for Service Account (IRSA) if using in AWS EKS with S3 bucket access
-
-### Creating IAM Role for Service Account (AWS EKS only)
-
-If deploying on EKS and using S3 for Spark Event logs, you'll need to create an
-IAM Role for Service Accounts:
-
-```shell
+```bash
 eksctl create iamserviceaccount \
-  --cluster=<eks-cluster-name> \
+  --cluster=your-eks-cluster \
   --name=spark-history-server \
   --namespace=spark-history-server \
-  --attach-policy-arn=arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
-```
-
-### Installing the Helm Chart
-
-Add the repository and update:
-
-```shell
-helm repo add kubedai https://kubedai.github.io/spark-history-server
-helm repo update
-```
-
-Install the chart:
-
-```shell
-helm install spark-history-server kubedai/spark-history-server --namespace spark-history-server
-```
-
-### Configuration
-
-Before deploying, you'll need to update the `values.yaml` file with:
-
-1. Service account annotations (with IRSA role ARN for AWS EKS)
-2. S3 bucket info for Spark event logs
-
-Example values:
-
-```yaml
-serviceAccount:
-  create: false
-  annotations:
-    eks.amazonaws.com/role-arn: "<ENTER_IRSA_IAM_ROLE_ARN_HERE>"
-  name: "spark-history-server"
-
-sparkHistoryOpts: "-Dspark.history.fs.logDirectory=s3a://<ENTER_S3_BUCKET_NAME>/<PREFIX_FOR_SPARK_EVENT_LOGS>/"
-```
-
-### Accessing Spark History Server UI
-
-#### Using port-forward
-
-```shell
-kubectl port-forward services/spark-history-server 18085:80 -n spark-history-server
-```
-
-Then open a browser and navigate to `http://localhost:18085/`
-
-#### Using Ingress
-
-If you have configured an ingress, you can access the UI through the ingress URL.
-
-### Managing the Helm Release
-
-Upgrade the chart:
-
-```shell
-helm upgrade spark-history-server --namespace spark-history-server
-```
-
-Uninstall the chart:
-
-```shell
-helm uninstall spark-history-server --namespace spark-history-server
+  --attach-policy-arn=arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess \
+  --approve
 ```
 
 ## Community
