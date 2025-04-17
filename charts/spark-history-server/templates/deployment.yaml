@@ -37,6 +37,9 @@ spec:
         - name: config-volume
           configMap:
             name: {{ template "spark-history-server.fullname" . }}
+        {{- if .Values.extraVolumes }}
+          {{- toYaml .Values.extraVolumes | nindent 8 }}
+        {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -56,6 +59,9 @@ spec:
             - name: config-volume
               mountPath: /opt/spark/conf/spark-defaults.conf
               subPath: spark-defaults.conf
+            {{- if .Values.extraVolumeMounts }}
+              {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
+            {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.service.internalPort }}

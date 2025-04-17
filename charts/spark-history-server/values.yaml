@@ -97,3 +97,28 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+# List of extra volume definitions (Kubernetes YAML format) to add to the pod spec.
+# Default is empty, meaning no extra volumes are added unless specified here.
+# See Kubernetes API reference for syntax (e.g., for PVCs, ConfigMaps, Secrets).
+# Example:
+# extraVolumes:
+#   - name: my-pvc-volume
+#     persistentVolumeClaim:
+#       claimName: my-existing-pvc
+#   - name: shared-scripts
+#     configMap:
+#       name: my-scripts-cm
+extraVolumes: []
+
+# List of extra volume mount definitions (Kubernetes YAML format) for the main container.
+# Default is empty. Mounts defined here must correspond by name to volumes
+# defined in extraVolumes or built-in volumes.
+# Example:
+# extraVolumeMounts:
+#  - name: my-pvc-volume
+#    mountPath: /mnt/data
+#    readOnly: true
+#  - name: shared-scripts
+#    mountPath: /opt/spark/user-scripts
+extraVolumeMounts: []
