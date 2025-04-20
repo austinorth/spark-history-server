@@ -135,6 +135,8 @@ The following table lists the configurable parameters of the Spark History Serve
 | sparkConf | string | `"spark.hadoop.fs.s3a.aws.credentials.provider=com.amazonaws.auth.WebIdentityTokenCredentialsProvider\n..."` | Spark configuration properties |
 | sparkHistoryOpts | string | `""` | Spark history server options (e.g., log directory location) |
 | tolerations | list | `[]` | Pod tolerations |
+| extraVolumes | list | `[]` | List of extra volume definitions (Kubernetes YAML format) to add to the pod specification. |
+| extraVolumeMounts | list | `[]` | List of extra volume mount definitions (Kubernetes YAML format) to add to the main container. |
 
 ## AWS S3 Integration
 
