@@ -2,6 +2,16 @@ apiVersion: v1
 entries:
   spark-history-server:
   - apiVersion: v2
+    appVersion: v3.3.4
+    created: "2025-04-21T18:16:48.416833008Z"
+    description: A Helm chart for deploying Spark History Server in Kubernetes
+    digest: 5fc41e2aa84e4a35f0123bf6d9769472313e5284c53d2d22dd05b06229e4bbb9
+    name: spark-history-server
+    type: application
+    urls:
+    - https://github.com/austinorth/spark-history-server/releases/download/spark-history-server-1.1.1/spark-history-server-1.1.1.tgz
+    version: 1.1.1
+  - apiVersion: v2
     appVersion: v3.3.2
     created: "2025-04-20T17:53:43.486693802Z"
     description: A Helm chart for deploying Spark History Server in Kubernetes
@@ -61,4 +71,4 @@ entries:
     urls:
     - https://github.com/austinorth/spark-history-server/releases/download/spark-history-server-1.0.0/spark-history-server-1.0.0.tgz
     version: 1.0.0
-generated: "2025-04-20T17:53:43.486716965Z"
+generated: "2025-04-21T18:16:48.416865769Z"
