@@ -7,10 +7,10 @@ RUN yum install -y procps
 
 WORKDIR /tmp/
 ADD pom.xml /tmp
-RUN curl -o ./spark-3.3.2-bin-without-hadoop.tgz https://archive.apache.org/dist/spark/spark-3.3.2/spark-3.3.2-bin-without-hadoop.tgz
-RUN tar -xzf spark-3.3.2-bin-without-hadoop.tgz && \
-    mv spark-3.3.2-bin-without-hadoop /opt/spark && \
-    rm spark-3.3.2-bin-without-hadoop.tgz
+RUN curl -o ./spark-3.3.4-bin-without-hadoop.tgz https://archive.apache.org/dist/spark/spark-3.3.4/spark-3.3.4-bin-without-hadoop.tgz
+RUN tar -xzf spark-3.3.4-bin-without-hadoop.tgz && \
+    mv spark-3.3.4-bin-without-hadoop /opt/spark && \
+    rm spark-3.3.4-bin-without-hadoop.tgz
 RUN mvn dependency:copy-dependencies -DoutputDirectory=/opt/spark/jars/
 RUN rm /opt/spark/jars/jsr305-3.0.0.jar && \
     rm /opt/spark/jars/jersey-*-1.19.4.jar && \
