@@ -1,5 +1,5 @@
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/spark-history-server)](https://artifacthub.io/packages/search?repo=spark-history-server)
-[![Docker Image](https://img.shields.io/docker/v/austinorth/spark-history-server/v3.3.4?label=docker&logo=docker)](https://hub.docker.com/repository/docker/austinorth/spark-history-server/tags/v3.3.4/sha256-3257f212c4b468ff66c308dc9fb7388ef29fa4a618a74a2bf7bfdd3e9e664c00)
+[![Docker Image](https://img.shields.io/docker/v/austinorth/spark-history-server/v3.3.4?label=docker&logo=docker)](https://hub.docker.com/repository/docker/austinorth/spark-history-server/tags/v3.3.4)
 
 # Spark History Server
 
